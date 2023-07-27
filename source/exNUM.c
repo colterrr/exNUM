@@ -20,6 +20,12 @@ int main()
 
     number_list list;
     list.len = 0;
+    list.bin_max_len = 0;
+    list.oct_max_len = 0;
+    list.dec_max_len = 0;
+    list.hex_max_len = 0;
+    list.alignment = NO_ALIGN;
+    list.display_mode = INIT;
 
     char tem_time[30];
 
@@ -103,13 +109,34 @@ int main()
                     "--------------------------------------\n");
             printf("\n(input q/Q to quit to go back to display)\n\n");
             printf("1 to clear\n");
+            printf("2 to change to no alignment mode\n");
+            printf("l/L to change to left alignment mode\n");
+            printf("r/R to change to right alignment mode\n");
+            printf("3 to attach reference zero\n");
+            printf("4 to divide number by bytes (available for bin/hex)\n");
+
             scanf("%s", input_str);
             if (strcmp(input_str, "q") == 0 || strcmp(input_str, "Q") == 0){
                 status = DISPLAY;
             }
             else if (strcmp(input_str, "1") == 0){
-                free(list.list);
+                free(list.arr);
                 list.len = 0;
+            }
+            else if (strcmp(input_str, "2") == 0){
+                list.alignment= NO_ALIGN;
+            }
+            else if (strcmp(input_str, "r") == 0 || strcmp(input_str, "R") == 0){
+                list.alignment = R_ALIGN;
+            }
+            else if (strcmp(input_str, "l") == 0 || strcmp(input_str, "L") == 0){
+                list.alignment = L_ALIGN;
+            }
+            else if (strcmp(input_str, "3") == 0){
+                list.display_mode |= ATTACH_ZERO;
+            }
+            else if (strcmp(input_str, "4") == 0){
+                list.display_mode |= DIVIDE_BYTE;
             }
             break;
         }
@@ -122,7 +149,7 @@ int main()
             printf("(input s/S to enter setting mode)\n\n");
         
             for (int i = 0; i < list.len ; i++){
-                output(list.list[i]);
+                output(i, &list);
             }
 
             scanf("%s", input_str);

@@ -2,11 +2,42 @@
 #define _EXNUM_H_
 
 #include "stdio.h"
+#include "stdint.h"
+
+#define INIT 0
+#define ATTACH_ZERO 1
+#define DIVIDE_BYTE 2
+
+typedef enum align_mode_e
+{
+    NO_ALIGN = 0,
+    L_ALIGN,
+    R_ALIGN
+}align_mode;
+
+typedef struct num_data_s
+{
+    int num;
+    uint8_t bin_len;
+    uint8_t oct_len;
+    uint8_t dec_len;
+    uint8_t hex_len;
+}num_data;
+
 
 typedef struct number_list_s
 {
-    int *list;
+
+    align_mode alignment;
+    uint8_t display_mode;
+
     int len;
+    num_data *arr;
+    
+    uint8_t bin_max_len;
+    uint8_t oct_max_len;
+    uint8_t dec_max_len;
+    uint8_t hex_max_len;
 }number_list;
 
 typedef enum now_status_e
@@ -18,7 +49,14 @@ typedef enum now_status_e
     ERROR
 }now_status;
 
+//次方运算
 #define p(__base__, __index__) (int)pow(__base__, __index__) 
+
+#define max(x,y)  ({ \
+typeof(x) _x = (x); \
+typeof(y) _y = (y); \
+_x > _y ? _x : _y; \
+})
 
 #define handle(__token__) \
 ((strcmp(__token__, "D") == 0 || strcmp(__token__, "DEC") == 0 || strcmp(__token__, "10") == 0) ? "DEC" :\
@@ -31,7 +69,7 @@ typedef enum now_status_e
 int ScanBIN(int *num, FILE* stream);
 void PrintBIN(int num);
 
-void output(int num);
+void output(int index, number_list* list);
 
 void hisW(char* input_base);
 void hisR(char* tem_time, char* input_base);

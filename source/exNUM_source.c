@@ -62,7 +62,7 @@ int read_num_buffer(char* in, int *num)
     FILE* f1 = fopen("buffer.txt", "r");
 
     if (strcmp(in, "OCT") == 0 || strcmp(in, "O") == 0 || strcmp(in, "8") == 0) fscanf(f1, "%o",num);
-    else if (strcmp(in, "HEX") == 0 || strcmp(in, "H") == 0 || strcmp(in, "16") == 0) fscanf(f1, "%x",num);
+    else if (strcmp(in, "HEX") == 0 || strcmp(in, "H") == 0 || strcmp(in, "16") == 0) fscanf(f1, "%X",num);
     else if (strcmp(in, "DEC") == 0 || strcmp(in, "D") == 0 || strcmp(in, "10") == 0) fscanf(f1, "%d",num);
     else if (strcmp(in, "BIN") == 0 || strcmp(in, "B") == 0 || strcmp(in, "2") == 0) sta = ScanBIN(num, f1);
     fclose(f1);
@@ -77,10 +77,59 @@ void write_buffer(char* str)
 }
 
 
-void output(int num)
+void output(int index, number_list* list)
 {
+    uint8_t space;int num = list->arr[index].num;
+    //bin
+    if (list->alignment == R_ALIGN){
+        space = list->bin_max_len - list->arr[index].bin_len;
+        for (uint8_t i = 0; i < space; i++) printf(" ");
+    }
     PrintBIN(num);
-    printf("  %o  %d  0x%X\n", num, num, num);
+    if (list->alignment == L_ALIGN){
+        space = list->bin_max_len - list->arr[index].bin_len;
+        for (uint8_t i = 0; i < space; i++) printf(" ");
+    }
+
+    printf("  ");
+
+    //oct
+    if (list->alignment == R_ALIGN){
+        space = list->oct_max_len - list->arr[index].oct_len;
+        for (uint8_t i = 0; i < space; i++) printf(" ");
+    }
+    printf("%o", num);
+    if (list->alignment == L_ALIGN){
+        space = list->oct_max_len - list->arr[index].oct_len;
+        for (uint8_t i = 0; i < space; i++) printf(" ");
+    }
+
+    printf("  ");
+
+    //dec
+    if (list->alignment == R_ALIGN){
+        space = list->dec_max_len - list->arr[index].dec_len;
+        for (uint8_t i = 0; i < space; i++) printf(" ");
+    }
+    printf("%d", num);
+    if (list->alignment == L_ALIGN){
+        space = list->dec_max_len - list->arr[index].dec_len;
+        for (uint8_t i = 0; i < space; i++) printf(" ");
+    }
+
+    printf("  ");
+
+    //hex
+    if (list->alignment == R_ALIGN){
+        space = list->hex_max_len - list->arr[index].hex_len;
+        for (uint8_t i = 0; i < space; i++) printf(" ");
+    }
+    printf("0x%X", num);
+    if (list->alignment == L_ALIGN){
+        space = list->hex_max_len - list->arr[index].hex_len;
+        for (uint8_t i = 0; i < space; i++) printf(" ");
+    }
+    printf("\n");
 }
 
 //文件是否为空
@@ -109,7 +158,7 @@ void hisW(char *input_base)
 //读取历史记录
 void hisR(char *tem_time, char *input_base)
 {
-    FILE *f2 = fopen("./backup/history.txt","r");
+    FILE *f2 = fopen("history.txt","r");
 
     fscanf(f2, "%3s\n", input_base);
     fgets(tem_time,100,f2);
@@ -119,15 +168,44 @@ void hisR(char *tem_time, char *input_base)
 
 void push_number(int num, number_list* list)
 {
-    if (list->len == 0){
-        list->list = (int*)malloc(sizeof(int));
-        list->list[0] = num;
+    int len = list->len;
+    if (!len){
+        list->arr = (num_data*)malloc(sizeof(num_data));
+        list->arr[0].num = num;
         list->len = 1;
     }
     else {
-        int len = list->len;
-        list->list = realloc(list->list, (len + 1) * sizeof(int));
-        list->list[len] = num;
+        list->arr = realloc(list->arr, (len + 1) * sizeof(num_data));
+        list->arr[len].num = num;
         list->len ++;
-    }   
+    }
+    //各进制长度计入
+    len = list->len;
+    uint8_t tem = 0;
+    while (num / p(2, tem++));
+    list->arr[len - 1].bin_len = tem - 1;
+    list->bin_max_len = max(list->bin_max_len, tem - 1);
+
+    tem = 0;
+    while (num / p(8, tem++));
+    list->arr[len - 1].oct_len = tem - 1;
+    list->oct_max_len = max(list->oct_max_len, tem - 1);
+
+    tem = 0;
+    while (num / p(10, tem++));
+    list->arr[len - 1].dec_len = tem - 1;
+    list->dec_max_len = max(list->dec_max_len, tem - 1);
+
+    tem = 0;
+    while (num / p(16, tem++));
+    list->arr[len - 1].hex_len = tem - 1;
+    list->hex_max_len = max(list->hex_max_len, tem - 1);
+}
+
+void debug(void)
+{
+    // printf("%d %d %d %d\n", list.bin_max_len, list.oct_max_len, list.dec_max_len, list.hex_max_len);
+    //     for (int i = 0; i < list.len; i++){
+    // printf("%d %d %d %d\n", list.arr[i].bin_len, list.arr[i].oct_len, list.arr[i].dec_len, list.arr[i].hex_len);
+    // }
 }
